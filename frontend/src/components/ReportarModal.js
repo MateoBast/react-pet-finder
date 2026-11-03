@@ -21,7 +21,7 @@ const ReportarModal = ({ petName, petId, onClose, onReport }) => {
     const token = getToken(); // Obtener el token
 
     try {
-      const response = await fetch('http://localhost:3000/api/reports', {
+      const response = await fetch('https://react-pet-finder.onrender.com/api/reports', {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',

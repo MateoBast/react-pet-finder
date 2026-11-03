@@ -7,7 +7,7 @@ const ParentComponent = () => {
   // Función para obtener las mascotas desde la API
   const fetchMascotas = async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/pets');
+      const response = await fetch('https://react-pet-finder.onrender.com/api/pets');
       if (!response.ok) {
         throw new Error('Error al obtener las mascotas');
       }

@@ -10,7 +10,6 @@ class PetModel {
     const result = await pool.query(query, [name, status, location, imageUrl, reporterId, descripcion]);
     return result.rows[0];
   }
-  
 static async getAllPets() {
   const result = await pool.query("SELECT * FROM pets WHERE status != 'found'");
   return result.rows;

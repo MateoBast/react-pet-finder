@@ -8,7 +8,9 @@ const { Pool } = pg;
 
 // Crear un pool de conexiones usando la URL de la base de datos
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL, // Usar la variable de entorno
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false // Agregar esto si es necesario
+  }
 });
-
 export default pool;

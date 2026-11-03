@@ -49,7 +49,7 @@ function App() {
   const fetchMascotas = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/pets`, {
+      const response = await fetch(`https://react-pet-finder.onrender.com/api/pets`, {
         headers: {
           'Content-Type': 'application/json',
         },

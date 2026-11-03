@@ -13,7 +13,7 @@ const MascotasReportadasPage = () => {
     if (user?.id) {
       const fetchMascotas = async () => {
         try {
-          const response = await fetch(`http://localhost:3000/api/pets?reporterId=${user.id}`);
+          const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?reporterId=${user.id}`);
           const data = await response.json();
           
           // Filtrar las mascotas para excluir las que están como "found"

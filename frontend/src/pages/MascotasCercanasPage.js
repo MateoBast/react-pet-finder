@@ -20,7 +20,7 @@ const MascotasCercanasPage = () => {
         });
 
         const petIds = hits.map(pet => pet.objectID);
-        const response = await fetch(`http://localhost:3000/api/pets?ids=${petIds.join(',')}`);
+        const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
         const data = await response.json();
 
         const orderedData = petIds.map(id => data.find(pet => String(pet.id) === String(id))).filter(Boolean);
@@ -37,7 +37,7 @@ const MascotasCercanasPage = () => {
 
   const handleReport = async (reportData) => {
     try {
-      const response = await fetch('http://localhost:3000/api/reports', {
+      const response = await fetch('https://react-pet-finder.onrender.com/api/reports', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

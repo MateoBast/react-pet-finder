@@ -8,7 +8,7 @@ const RequestPasswordResetPage = () => {
     e.preventDefault();
 
     try {
-      const res = await fetch('http://localhost:3000/api/request-password-reset', {
+      const res = await fetch('https://react-pet-finder.onrender.com/api/request-password-reset', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),

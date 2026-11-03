@@ -10,7 +10,7 @@ export const createPet = async (req, res) => {
     const reporterId = req.user.id; // Obtén el id del usuario del middleware
 
     const { name, descripcion, status, location: locationStr } = req.body;
-    const imageurl = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
+    const imageurl = req.file ? `https://react-pet-finder.onrender.com/uploads/${req.file.filename}` : null;
 
     if (!name || !descripcion || !status || !locationStr || !imageurl) {
       return res.status(400).json({ error: 'Todos los campos son obligatorios.' });

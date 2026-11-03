@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
   const updatePassword = async (newPassword) => {
     // Lógica para hacer la llamada a la API y cambiar la contraseña
-    const response = await fetch('http://localhost:3000/api/cambiar-contrasena', {
+    const response = await fetch('https://react-pet-finder.onrender.com/api/cambiar-contrasena', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
