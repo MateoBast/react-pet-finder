@@ -1,0 +1,38 @@
+body{
+    margin: 0;
+}
+
+.bodyHome{
+    background: linear-gradient(180deg, #f0f7f7 0%, #d9edea 100%);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.contenedorHome{
+    width: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.contenedorboteneshome{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 50%;
+}
+
+.tituloHome{
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+    font-size: 45px;
+    color: #EB6372;
+}
+.textoHome{
+    text-align: center;
+    font-family: 'Poppins', sans-serif;
+    font-size: 20px;
+}

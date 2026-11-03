@@ -1,0 +1,39 @@
+.how-it-works-container {
+  max-width: 800px; /* Ancho máximo */
+  margin: 0 auto; /* Centrar el contenedor */
+  margin-top: 100px;
+  padding: 20px; /* Espaciado interno */
+  background-color: #f9f9f9; /* Fondo claro */
+  border-radius: 8px; /* Bordes redondeados */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Sombra sutil */
+}
+
+.how-it-works-title {
+  font-size: 2rem; /* Tamaño de fuente grande */
+  color: #333; /* Color del texto */
+  text-align: center; /* Centrar el texto */
+}
+
+.how-it-works-description {
+  font-size: 1.2rem; /* Tamaño de fuente más grande */
+  color: #555; /* Color del texto */
+  margin-bottom: 20px; /* Espaciado inferior */
+}
+
+.how-it-works-steps-title {
+  font-size: 1.5rem; /* Tamaño de fuente para el título de pasos */
+  color: #333; /* Color del texto */
+  margin-top: 20px; /* Espaciado superior */
+}
+
+.how-it-works-steps {
+  list-style-type: decimal; /* Estilo de lista numerada */
+  padding-left: 20px; /* Espaciado a la izquierda */
+}
+
+.how-it-works-conclusion {
+  font-size: 1.2rem; /* Tamaño de fuente para la conclusión */
+  color: #333; /* Color del texto */
+  margin-top: 20px; /* Espaciado superior */
+  text-align: center; /* Centrar el texto */
+}

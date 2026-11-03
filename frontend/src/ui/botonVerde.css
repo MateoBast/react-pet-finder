@@ -1,0 +1,17 @@
+.botonVerde {
+  background-color: #00A884; /* azul */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 20px;
+  cursor: pointer;
+  width: 100%; /* para que ocupe todo el ancho */
+  height: 50px;
+  transition: background-color 0.3s ease;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.botonVerde:hover {
+  background-color: #008f6e; 
+}

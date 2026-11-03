@@ -1,0 +1,27 @@
+.contenedorModificarDatos {
+  width: 400px; /* Ancho máximo del contenedor */
+  margin: auto; /* Centra el contenedor */
+  padding: 20px; /* Espaciado interno */
+  text-align: center; /* Centra el texto */
+}
+
+.tituloModificar {
+  font-size: 60px; /* Tamaño de fuente */
+  font-weight: bold; /* Negrita */
+  margin-bottom: 20px; /* Espaciado inferior */
+}
+
+.inputModificar {
+  width: 93%; /* Ancho completo */
+  padding: 10px; /* Espaciado interno */
+  margin-bottom: 15px; /* Espaciado inferior */
+  border: 1px solid #ccc; /* Borde gris */
+  border-radius: 5px; /* Bordes redondeados */
+  font-size: 16px; /* Tamaño de fuente */
+}
+
+.inputModificar::placeholder {
+  color: #aaa; /* Color del texto del placeholder */
+}
+
+
