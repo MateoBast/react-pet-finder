@@ -15,3 +15,6 @@ pool.connect()
   .catch(err => {
     console.error('Error de conexión', err);
   });
+
+
+  export default pool;
