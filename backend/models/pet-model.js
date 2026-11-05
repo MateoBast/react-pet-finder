@@ -1,91 +1,61 @@
-import { supabase } from '../servicesback/supabaseClient.js'; // Asegúrate de que la ruta sea correcta
+import pool from '../servicesback/react-pet-finder-db.js';
 
 class PetModel {
   static async createPet(name, status, location, imageUrl, reporterId = null, descripcion) {
-    const { data: newPet, error } = await supabase
-      .from('pets')
-      .insert([{ name, status, location, imageUrl, reporterId, descripcion }])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return newPet; // Retorna la nueva mascota creada
+    const query = `
+      INSERT INTO pets (name, status, location, imageUrl, "reporterId", descripcion)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [name, status, location, imageUrl, reporterId, descripcion]);
+    return result.rows[0];
   }
-
-  static async getAllPets() {
-    const { data: pets, error } = await supabase
-      .from('pets')
-      .select('*')
-      .neq('status', 'found'); // Filtrar mascotas encontradas
-
-    if (error) throw error;
-
-    return pets; // Retorna todas las mascotas
-  }
-
+static async getAllPets() {
+  const result = await pool.query("SELECT * FROM pets WHERE status != 'found'");
+  return result.rows;
+}
+  
   static async getPetById(id) {
-    const { data: pet, error } = await supabase
-      .from('pets')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Mascota no encontrada
-      }
-      throw error;
-    }
-
-    return pet; // Retorna la mascota encontrada
+    const result = await pool.query('SELECT * FROM pets WHERE id = $1', [id]);
+    return result.rows[0];
   }
-
+  
+  // Actualización flexible con objeto updateData
   static async updatePet(id, updateData) {
-    const { data: updatedPet, error } = await supabase
-      .from('pets')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Mascota no encontrada
-      }
-      throw error;
+    // Armamos dinámicamente la query y los valores para solo actualizar lo que venga
+    const fields = [];
+    const values = [];
+    let idx = 1;
+    
+    for (const key in updateData) {
+      fields.push(`"${key}" = $${idx}`);
+      values.push(updateData[key]);
+      idx++;
     }
-
-    return updatedPet; // Retorna la mascota actualizada
+    values.push(id);
+    
+    const query = `
+    UPDATE pets
+    SET ${fields.join(', ')}
+    WHERE id = $${idx}
+    RETURNING *;
+    `;
+    
+    const result = await pool.query(query, values);
+    return result.rows[0];
   }
-
+  
   static async getPetsByReporterId(reporterId) {
-    const { data: pets, error } = await supabase
-      .from('pets')
-      .select('*')
-      .eq('reporterId', reporterId);
-
-    if (error) throw error;
-
-    return pets; // Retorna las mascotas del reportero
+    const query = 'SELECT * FROM pets WHERE "reporterId" = $1;';
+    const result = await pool.query(query, [reporterId]);
+  
+    return result.rows;
   }
-
+  
   static async deletePet(id) {
-    const { data: deletedPet, error } = await supabase
-      .from('pets')
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Mascota no encontrada
-      }
-      throw error;
-    }
-
-    return deletedPet; // Retorna la mascota eliminada
+    const query = 'DELETE FROM pets WHERE id = $1 RETURNING *;';
+    const result = await pool.query(query, [id]);
+    return result.rows[0];
   }
 }
 

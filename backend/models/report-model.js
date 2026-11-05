@@ -1,104 +1,56 @@
-import { supabase } from '../servicesback/supabaseClient.js'; // Asegúrate de que la ruta sea correcta
+import pool from '../servicesback/react-pet-finder-db.js';
 
 class ReportModel {
-  static async createReport(petId, reporterName, reporterPhone, location, reporterId) {
-    const { data: newReport, error } = await supabase
-      .from('reports')
-      .insert([{ petId, reporterName, reporterPhone, location, reporterId }])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    return newReport; // Retorna el nuevo reporte creado
-  }
+static async createReport(petId, reporterName, reporterPhone, location, reporterId) {
+  const query = `
+    INSERT INTO reports (petId, reporterName, reporterPhone, location, reporterId, timestamp)
+    VALUES ($1, $2, $3, $4, $5, NOW())
+    RETURNING *;
+  `;
+  const result = await pool.query(query, [petId, reporterName, reporterPhone, location, reporterId]);
+  return result.rows[0];
+}
 
   static async getAllReports() {
-    const { data: reports, error } = await supabase
-      .from('reports')
-      .select('*');
-
-    if (error) throw error;
-
-    return reports; // Retorna todos los reportes
+    const result = await pool.query('SELECT * FROM reports');
+    return result.rows;
   }
 
   static async getReportById(id) {
-    const { data: report, error } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Reporte no encontrado
-      }
-      throw error;
-    }
-
-    return report; // Retorna el reporte encontrado
+    const result = await pool.query('SELECT * FROM reports WHERE id = $1', [id]);
+    return result.rows[0];
   }
 
   static async updateReport(id, petId, reporterPhone, location) {
-    const { data: updatedReport, error } = await supabase
-      .from('reports')
-      .update({ petId, reporterPhone, location })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Reporte no encontrado
-      }
-      throw error;
-    }
-
-    return updatedReport; // Retorna el reporte actualizado
+    const query = `
+      UPDATE reports
+      SET petId = $1, reporterPhone = $2, location = $3
+      WHERE id = $4
+      RETURNING *;
+    `;
+    const result = await pool.query(query, [petId, reporterPhone, location, id]);
+    return result.rows[0];
   }
 
   static async deleteReport(id) {
-    const { data: deletedReport, error } = await supabase
-      .from('reports')
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null; // Reporte no encontrado
-      }
-      throw error;
-    }
-
-    return deletedReport; // Retorna el reporte eliminado
+    const query = 'DELETE FROM reports WHERE id = $1 RETURNING *;';
+    const result = await pool.query(query, [id]);
+    return result.rows[0];
   }
-
   static async getOwnerEmailByPetId(petId) {
-    const { data: ownerEmailData, error } = await supabase
-      .from('pets')
-      .select('ownerId(email)')
-      .eq('id', petId)
-      .single();
-
-    if (error) throw error;
-
-    return ownerEmailData?.email; // Devuelve el email o undefined si no existe
+    const result = await pool.query('SELECT email FROM users WHERE id = (SELECT ownerId FROM pets WHERE id = $1)', [petId]);
+    return result.rows[0]?.email; // Devuelve el email o undefined si no existe
   }
-
-  static async getReporterEmailByPetId(petId) {
-    const { data: reporterEmailData, error } = await supabase
-      .from('pets')
-      .select('reporterId(email)')
-      .eq('id', petId)
-      .single();
-
-    if (error) throw error;
-
-    return reporterEmailData?.email; // Devuelve el email o undefined si no existe
-  }
+static async getReporterEmailByPetId(petId) {
+  const query = `
+    SELECT users.email 
+    FROM users 
+    INNER JOIN pets ON pets."reporterId" = users.id 
+    WHERE pets.id = $1;
+  `;
+  const result = await pool.query(query, [petId]);
+  return result.rows[0]?.email;
+}
 }
 
 export default ReportModel;

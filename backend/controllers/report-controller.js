@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { supabase } from '../servicesback/supabaseClient.js'; // Importar Supabase
+import ReportModel from '../models/report-model.js'; // Ajusta la ruta según tu estructura de carpetas
 
 dotenv.config();
 
@@ -23,25 +23,8 @@ export const createReport = async (req, res) => {
   }
 
   try {
-    // Crear el reporte en Supabase
-    const { data: newReport, error } = await supabase
-      .from('reports')
-      .insert([{ petId, reporterName, reporterPhone, location, reporterId }])
-      .select()
-      .single();
-
-    if (error) throw error;
-
-    // Obtener el email del reportero
-    const { data: reporterEmailData, error: emailError } = await supabase
-      .from('pets')
-      .select('reporterEmail') // Asegúrate de que esta columna exista
-      .eq('id', petId)
-      .single();
-
-    if (emailError) throw emailError;
-
-    const reporterEmail = reporterEmailData?.reporterEmail;
+    const newReport = await ReportModel.createReport(petId, reporterName, reporterPhone, location, reporterId);
+    const reporterEmail = await ReportModel.getReporterEmailByPetId(petId);
 
     if (reporterEmail) {
       await transporter.sendMail({
@@ -59,14 +42,11 @@ export const createReport = async (req, res) => {
   }
 };
 
+
+
 export const getAllReports = async (req, res) => {
   try {
-    const { data: reports, error } = await supabase
-      .from('reports')
-      .select('*');
-
-    if (error) throw error;
-
+    const reports = await ReportModel.getAllReports();
     res.status(200).json(reports);
   } catch (error) {
     console.error('Error al obtener avistamientos:', error);
@@ -78,19 +58,10 @@ export const getReportById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const { data: report, error } = await supabase
-      .from('reports')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Avistamiento no encontrado.' });
-      }
-      throw error;
+    const report = await ReportModel.getReportById(id);
+    if (!report) {
+      return res.status(404).json({ error: 'Avistamiento no encontrado.' });
     }
-
     res.status(200).json(report);
   } catch (error) {
     console.error('Error al obtener el avistamiento:', error);
@@ -103,20 +74,10 @@ export const updateReport = async (req, res) => {
   const { petId, reporterPhone, location } = req.body;
 
   try {
-    const { data: updatedReport, error } = await supabase
-      .from('reports')
-      .update({ petId, reporterPhone, location })
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Avistamiento no encontrado.' });
-      }
-      throw error;
+    const updatedReport = await ReportModel.updateReport(id, petId, reporterPhone, location);
+    if (!updatedReport) {
+      return res.status(404).json({ error: 'Avistamiento no encontrado.' });
     }
-
     res.status(200).json(updatedReport);
   } catch (error) {
     console.error('Error al actualizar el avistamiento:', error);
@@ -128,20 +89,10 @@ export const deleteReport = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const { data: deletedReport, error } = await supabase
-      .from('reports')
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Avistamiento no encontrado.' });
-      }
-      throw error;
+    const deletedReport = await ReportModel.deleteReport(id);
+    if (!deletedReport) {
+      return res.status(404).json({ error: 'Avistamiento no encontrado.' });
     }
-
     res.status(200).json({ message: 'Avistamiento eliminado correctamente.' });
   } catch (error) {
     console.error('Error al eliminar el avistamiento:', error);

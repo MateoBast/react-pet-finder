@@ -1,9 +1,6 @@
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { supabase } from '../servicesback/supabaseClient.js'; // Importar Supabase
-import dotenv from 'dotenv';
-
-dotenv.config();
+import UserModel from '../models/user-model.js';
+import jwt from 'jsonwebtoken'; // Asegúrate de que esta línea esté presente
 
 export const createUser = async (req, res) => {
   const { name, email, password, location } = req.body;
@@ -13,35 +10,23 @@ export const createUser = async (req, res) => {
   }
 
   try {
-    // Verificar si el email ya existe
-    const { data: existingUser, error: fetchError } = await supabase
-      .from('users')
-      .select('id')
-      .eq('email', email)
-      .single();
-
-    if (fetchError && fetchError.code !== 'PGRST116') throw fetchError; // Error distinto a no encontrado
-
+    // Verificar si el email ya existe para evitar duplicados
+    const existingUser = await UserModel.getUserByEmail(email);
     if (existingUser) {
       return res.status(409).json({ error: 'El email ya está registrado.' });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = await UserModel.createUser(name, email, hashedPassword, location);
 
-    const { data: newUser, error: insertError } = await supabase
-      .from('users')
-      .insert([{ name, email, password: hashedPassword, location }])
-      .select()
-      .single();
-
-    if (insertError) throw insertError;
-
+    // Generar token para el nuevo usuario
     const token = jwt.sign(
       { id: newUser.id, email: newUser.email },
-      process.env.JWT_SECRET,
+      'tu_clave_secreta', // Mejor usar variable de entorno
       { expiresIn: '1d' }
     );
 
+    // Excluir password antes de enviar
     const { password: pwd, ...userWithoutPassword } = newUser;
 
     res.status(201).json({
@@ -58,19 +43,10 @@ export const getUserById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const { data: user, error } = await supabase
-      .from('users')
-      .select('*')
-      .eq('id', id)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Usuario no encontrado.' });
-      }
-      throw error;
+    const user = await UserModel.getUserById(id);
+    if (!user) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
-
     res.status(200).json(user);
   } catch (error) {
     console.error('Error al obtener el usuario:', error);
@@ -82,26 +58,17 @@ export const updateUser = async (req, res) => {
   const { id } = req.params;
   const { name, email, location } = req.body;
 
+  // Creamos un objeto para los campos a actualizar
   const fieldsToUpdate = {};
-  if (name) fieldsToUpdate.name = name;
-  if (email) fieldsToUpdate.email = email;
-  if (location) fieldsToUpdate.location = location;
+  if (name) fieldsToUpdate.name = name; // Solo si hay un nuevo nombre
+  if (email) fieldsToUpdate.email = email; // Solo si hay un nuevo email
+  if (location) fieldsToUpdate.location = location; // Solo si hay una nueva ubicación
 
   try {
-    const { data: updatedUser, error } = await supabase
-      .from('users')
-      .update(fieldsToUpdate)
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Usuario no encontrado.' });
-      }
-      throw error;
+    const updatedUser = await UserModel.updateUser(id, fieldsToUpdate);
+    if (!updatedUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
-
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error('Error al actualizar el usuario:', error);
@@ -113,20 +80,10 @@ export const deleteUser = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const { data: deletedUser, error } = await supabase
-      .from('users')
-      .delete()
-      .eq('id', id)
-      .select()
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return res.status(404).json({ error: 'Usuario no encontrado.' });
-      }
-      throw error;
+    const deletedUser = await UserModel.deleteUser(id);
+    if (!deletedUser) {
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
     }
-
     res.status(200).json({ message: 'Usuario eliminado correctamente.' });
   } catch (error) {
     console.error('Error al eliminar el usuario:', error);
@@ -134,14 +91,10 @@ export const deleteUser = async (req, res) => {
   }
 };
 
+
 export const getAllUsers = async (req, res) => {
   try {
-    const { data: users, error } = await supabase
-      .from('users')
-      .select('*');
-
-    if (error) throw error;
-
+    const users = await UserModel.getAllUsers(); // Asegúrate de que esta función esté definida en tu modelo
     res.status(200).json(users);
   } catch (error) {
     console.error('Error al obtener todos los usuarios:', error);
