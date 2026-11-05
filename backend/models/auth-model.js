@@ -1,18 +1,13 @@
-import bcrypt from 'bcrypt';
-import UserModel from './user-model.js'; // Asegúrate de la ruta correcta
+import { supabase } from '../supabaseClient.js'; // Ajustá la ruta si hace falta
 
 const login = async (email, password) => {
-  const user = await UserModel.getUserByEmail(email);
-  
-  if (!user) {
-    throw new Error('Usuario no encontrado');
-  }
+  const { user, error } = await supabase.auth.signIn({
+    email,
+    password,
+  });
 
-  // Comparar la contraseña
-  const isMatch = await bcrypt.compare(password, user.password);
-  
-  if (!isMatch) {
-    throw new Error('Contraseña incorrecta');
+  if (error) {
+    throw new Error(error.message);
   }
 
   return user; // Retorna el usuario si todo es correcto

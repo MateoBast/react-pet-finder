@@ -5,6 +5,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer'; // Importamos Nodemailer
+import { supabase } from '../supabaseClient.js'; // Importar Supabase
 
 dotenv.config();
 
@@ -19,17 +20,17 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
-// Resto de tu código...
-
-
 // Controlador de login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    const user = await AuthModel.login(email, password);
-    const { password: userPassword, ...userWithoutPassword } = user;
+    const { user, error } = await supabase.auth.signIn({
+      email,
+      password,
+    });
+
+    if (error) throw new Error(error.message);
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -40,7 +41,7 @@ export const loginUser = async (req, res) => {
     res.status(200).json({ 
       success: true, 
       message: 'Inicio de sesión exitoso', 
-      user: { ...userWithoutPassword, token },
+      user: { id: user.id, email: user.email, token },
     });
   } catch (error) {
     console.log('Error en login:', error.message);
@@ -49,13 +50,14 @@ export const loginUser = async (req, res) => {
 };
 
 export const changePassword = async (req, res) => {
+  const { newPassword } = req.body;
+
   try {
-    const userId = req.user.id;
-    const { newPassword } = req.body;
+    const { user, error } = await supabase.auth.update({
+      password: newPassword,
+    });
 
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-    await UserModel.updatePassword(userId, hashedPassword);
+    if (error) throw new Error(error.message);
 
     res.status(200).json({ message: 'Contraseña actualizada correctamente' });
   } catch (error) {

@@ -1,13 +1,12 @@
-import PetModel from '../models/pet-model.js';
 import jwt from 'jsonwebtoken';
 import algoliaClient from '../servicesback/algoliaClient.js'; // Importás el cliente
+import { supabase } from '../supabaseClient.js'; // Importar Supabase
 
 const index = algoliaClient.initIndex('pets'); // Inicializás el índice acá
 
 export const createPet = async (req, res) => {
   try {
-    // Aquí ya no necesitas verificar el token, eso lo hace el middleware
-    const reporterId = req.user.id; // Obtén el id del usuario del middleware
+    const reporterId = req.user.id;
 
     const { name, descripcion, status, location: locationStr } = req.body;
     const imageurl = req.file ? `https://react-pet-finder.onrender.com/uploads/${req.file.filename}` : null;
@@ -26,17 +25,32 @@ export const createPet = async (req, res) => {
       return res.status(400).json({ error: 'Location debe ser un JSON válido con lat y lng' });
     }
 
-    // Crear la mascota en la base de datos
-    const newPet = await PetModel.createPet(name, status, JSON.stringify(location), imageurl, reporterId, descripcion);
+    // Crear la mascota en Supabase
+    const { data: newPet, error } = await supabase
+      .from('pets')
+      .insert([
+        {
+          name,
+          descripcion,
+          status,
+          location: JSON.stringify(location),
+          imageurl,
+          reporterId,
+        },
+      ])
+      .select()
+      .single();
+
+    if (error) throw error;
 
     // Guardar en Algolia
     await index.saveObject({
       objectID: newPet.id,
       name: newPet.name,
-      descripcion: descripcion,
+      descripcion: newPet.descripcion,
       status: newPet.status,
-      location: newPet.location, // Guardar location como string
-      _geoloc: { lat: location.lat, lng: location.lng }, // Guardar _geoloc como objeto
+      location: newPet.location,
+      _geoloc: { lat: location.lat, lng: location.lng },
       imageurl: newPet.imageurl,
       reporterId: newPet.reporterId,
     });
@@ -60,10 +74,18 @@ export const updatePet = async (req, res) => {
     if (imageurl) updateData.imageurl = imageurl;
     if (descripcion) updateData.descripcion = descripcion;
 
-    const updatedPet = await PetModel.updatePet(petId, updateData);
+    const { data: updatedPet, error } = await supabase
+      .from('pets')
+      .update(updateData)
+      .eq('id', petId)
+      .select()
+      .single();
 
-    if (!updatedPet) {
-      return res.status(404).json({ error: 'Mascota no encontrada.' });
+    if (error) {
+      if (error.code === 'PGRST116') { // Not found
+        return res.status(404).json({ error: 'Mascota no encontrada.' });
+      }
+      throw error;
     }
 
     res.json(updatedPet);
@@ -77,10 +99,20 @@ export const deletePet = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const deletedPet = await PetModel.deletePet(id);
-    if (!deletedPet) {
-      return res.status(404).json({ error: 'Mascota no encontrada.' });
+    const { data: deletedPet, error } = await supabase
+      .from('pets')
+      .delete()
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Mascota no encontrada.' });
+      }
+      throw error;
     }
+
     res.status(200).json({ message: 'Mascota eliminada correctamente.' });
   } catch (error) {
     console.error('Error al eliminar la mascota:', error);
@@ -92,12 +124,14 @@ export const getAllPets = async (req, res) => {
   const { reporterId } = req.query;
 
   try {
-    let pets;
+    let query = supabase.from('pets').select('*');
     if (reporterId) {
-      pets = await PetModel.getPetsByReporterId(reporterId);
-    } else {
-      pets = await PetModel.getAllPets();
+      query = query.eq('reporterId', reporterId);
     }
+    const { data: pets, error } = await query;
+
+    if (error) throw error;
+
     res.status(200).json(pets);
   } catch (error) {
     console.error('Error al obtener mascotas:', error);
@@ -109,10 +143,19 @@ export const getPetById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const pet = await PetModel.getPetById(id);
-    if (!pet) {
-      return res.status(404).json({ error: 'Mascota no encontrada.' });
+    const { data: pet, error } = await supabase
+      .from('pets')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return res.status(404).json({ error: 'Mascota no encontrada.' });
+      }
+      throw error;
     }
+
     res.status(200).json(pet);
   } catch (error) {
     console.error('Error al obtener la mascota:', error);
