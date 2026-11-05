@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import { supabase } from '../supabaseClient.js'; // Importar Supabase
+import { supabase } from '../servicesback/supabaseClient.js'; // Importar Supabase
 
 dotenv.config();
 

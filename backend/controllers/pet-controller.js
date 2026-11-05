@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import algoliaClient from '../servicesback/algoliaClient.js'; // Importás el cliente
-import { supabase } from '../supabaseClient.js'; // Importar Supabase
+import { supabase } from '../servicesback/supabaseClient.js'; // Importar Supabase
 
 const index = algoliaClient.initIndex('pets'); // Inicializás el índice acá
 

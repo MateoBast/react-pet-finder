@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
 import nodemailer from 'nodemailer'; // Importamos Nodemailer
-import { supabase } from '../supabaseClient.js'; // Importar Supabase
+import { supabase } from '../servicesback/supabaseClient.js'; // Importar Supabase
 
 dotenv.config();
 

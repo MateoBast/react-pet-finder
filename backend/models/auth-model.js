@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient.js'; // Ajustá la ruta si hace falta
+import { supabase } from '../servicesback/supabaseClient.js'; // Ajustá la ruta si hace falta
 
 const login = async (email, password) => {
   const { user, error } = await supabase.auth.signIn({

@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient.js'; // Asegúrate de que la ruta sea correcta
+import { supabase } from '../servicesback/supabaseClient.js'; // Asegúrate de que la ruta sea correcta
 
 class ReportModel {
   static async createReport(petId, reporterName, reporterPhone, location, reporterId) {

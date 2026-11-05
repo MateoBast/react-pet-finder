@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { supabase } from '../supabaseClient.js'; // Importar Supabase
+import { supabase } from '../servicesback/supabaseClient.js'; // Importar Supabase
 import dotenv from 'dotenv';
 
 dotenv.config();

@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient.js'; // Asegúrate de que la ruta sea correcta
+import { supabase } from '../servicesback/supabaseClient.js'; // Asegúrate de que la ruta sea correcta
 
 class PetModel {
   static async createPet(name, status, location, imageUrl, reporterId = null, descripcion) {

@@ -1,4 +1,4 @@
-import { supabase } from '../supabaseClient.js'; // Ajustá la ruta si hace falta
+import { supabase } from '../servicesback/supabaseClient.js'; // Ajustá la ruta si hace falta
 
 class UserModel {
   static async savePasswordResetToken(userId, token, expiration) {
