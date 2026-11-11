@@ -35,13 +35,15 @@ const UserForm = () => {
           return;
         }
 
-        const newUserResponse = await createUser({ name, email, password });
-        if (newUserResponse.data) {
-          alert('Usuario creado exitosamente');
-          setIsLogin(true);
-        } else {
-          alert('Error al crear el usuario');
-        }
+const newUserResponse = await createUser({ name, email, password });
+console.log('Respuesta completa:', newUserResponse);
+if (newUserResponse.data) {
+  alert('Usuario creado exitosamente');
+  setIsLogin(true);
+} else {
+  alert('Error al crear el usuario');
+}
+
       }
     } catch (error) {
       console.error('Error:', error);
