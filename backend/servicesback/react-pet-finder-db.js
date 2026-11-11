@@ -3,19 +3,21 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-console.log(process.env.URL_DATABASE)
+console.log(process.env.URL_DATABASE);
+
 const pool = new Pool({
-  connectionString: process.env.URL_DATABASE, // Asegúrate de que esta variable esté en tu .env
+  connectionString: process.env.URL_DATABASE, // fijate que coincida el nombre de la variable
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
 pool.connect()
   .then(() => {
     console.log('Conexión exitosa a la base de datos');
-    // No cerrar el pool acá
   })
   .catch(err => {
     console.error('Error de conexión', err);
   });
 
-
-  export default pool;
+export default pool;
