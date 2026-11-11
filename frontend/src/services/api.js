@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'hhttps://react-pet-finder.onrender.com'; // Cambia esto por tu URL
+const API_URL = 'https://react-pet-finder.onrender.com'; // Cambia esto por tu URL
 
 export const getPets = () => axios.get(`${API_URL}/api/pets`);
 export const createUser = (userData) => axios.post(`${API_URL}/api/users`, userData);
