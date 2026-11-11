@@ -10,7 +10,7 @@ const pool = new Pool({
 pool.connect()
   .then(() => {
     console.log('Conexión exitosa a la base de datos');
-    pool.end(); // Cerrar la conexión
+    // No cerrar el pool acá
   })
   .catch(err => {
     console.error('Error de conexión', err);
