@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+console.log(process.env.URL_DATABASE)
 const pool = new Pool({
   connectionString: process.env.URL_DATABASE, // Asegúrate de que esta variable esté en tu .env
 });
