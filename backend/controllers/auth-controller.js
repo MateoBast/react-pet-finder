@@ -90,16 +90,24 @@ export const requestPasswordReset = async (req, res) => {
     await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
 
     const msg = {
-      to: email,
-      from: 'mateobastidas146@gmail.com', 
-      subject: 'Solicitud de reseteo de contraseña',
-      text: `
-        Hola ${user.name},
-        Hiciste una solicitud para resetear tu contraseña. Hacé click en el siguiente enlace para continuar:
-        https://react-pet-finder.onrender.com/reset-password?token=${token}
-        Este link es válido por 1 hora.
-      `,
-    };
+  to: email,
+  from: 'mateobastidas146@gmail.com', // Cambiar a un dominio propio si es posible
+  subject: 'Solicitud de reseteo de contraseña',
+  text: `
+    Hola ${user.name},
+    Hiciste una solicitud para resetear tu contraseña. Hacé click en el siguiente enlace para continuar:
+    https://react-pet-finder.onrender.com/reset-password?token=${token}
+    Este link es válido por 1 hora.
+  `,
+  html: `
+    <p>Hola ${user.name},</p>
+    <p>Hiciste una solicitud para resetear tu contraseña. Hacé click en el siguiente enlace para continuar:</p>
+    <a href="https://react-pet-finder.onrender.com/reset-password?token=${token}">Resetear contraseña</a>
+    <p>Este link es válido por 1 hora.</p>
+    <hr />
+    <p>Si no solicitaste este mail, podés ignorarlo.</p>
+  `,
+};
 
     await sgMail.send(msg);
 
