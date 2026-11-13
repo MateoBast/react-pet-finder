@@ -136,7 +136,7 @@ export const resetPassword = async (req, res) => {
     await UserModel.clearResetToken(user.id);
 
     // Redirigir a localhost después de actualizar la contraseña
-    res.redirect('https://react-pet-finder.onrender.com');
+    res.redirect('http://localhost:3001');
   } catch (error) {
     console.error('Error en resetPassword:', error);
     res.status(500).send('Error al actualizar la contraseña.');
