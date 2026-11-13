@@ -1,18 +1,10 @@
-import nodemailer from 'nodemailer';
 import dotenv from 'dotenv';
-import ReportModel from '../models/report-model.js'; // Ajusta la ruta según tu estructura de carpetas
+import sgMail from '@sendgrid/mail';
+import ReportModel from '../models/report-model.js'; // Ajusta la ruta según tu estructura
 
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST, // smtp.gmail.com
-  port: process.env.SMTP_PORT, // 587
-  secure: false, // true si usás puerto 465
-  auth: {
-    user: process.env.GMAIL_USER, // Cambiado a GMAIL_USER
-    pass: process.env.GMAIL_PASS, // Cambiado a GMAIL_PASS
-  },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const createReport = async (req, res) => {
   const { petId, reporterName, reporterPhone, location } = req.body;
@@ -27,12 +19,13 @@ export const createReport = async (req, res) => {
     const reporterEmail = await ReportModel.getReporterEmailByPetId(petId);
 
     if (reporterEmail) {
-      await transporter.sendMail({
-        from: `"Tu App" <${process.env.SMTP_USER}>`,
+      const msg = {
         to: reporterEmail,
+        from: 'tu-email-verificado@sendgrid.com', // tu email verificado en SendGrid
         subject: `Nueva información sobre tu mascota ${petId}`,
         text: `Hola! Alguien reportó haber visto a tu mascota.\nNombre del reportero: ${reporterName}\nTeléfono: ${reporterPhone}\nUbicación: ${location}`,
-      });
+      };
+      await sgMail.send(msg);
     }
 
     res.status(201).json(newReport);
@@ -41,7 +34,6 @@ export const createReport = async (req, res) => {
     res.status(500).json({ error: 'Error al crear el avistamiento.' });
   }
 };
-
 
 
 export const getAllReports = async (req, res) => {

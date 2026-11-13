@@ -4,23 +4,11 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer'; // Importamos Nodemailer
+import sgMail from '@sendgrid/mail'; // Import SendGrid
 
 dotenv.config();
+sgMail.setApiKey(process.env.SENDGRID_API_KEY); // Configurar API key
 
-// Verificar las variables de entorno
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST, // por ejemplo smtp.gmail.com
-  port: process.env.SMTP_PORT, // 587 o 465 según el servicio
-  secure: false, // true si usás puerto 465
-  auth: {
-    user: process.env.GMAIL_USER, // cambió acá
-    pass: process.env.GMAIL_PASS, // y acá
-  },
-});
-
-
-// Resto de tu código...
 
 
 // Controlador de login
@@ -101,10 +89,9 @@ export const requestPasswordReset = async (req, res) => {
 
     await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
 
-    // Enviar el email usando Nodemailer
-    await transporter.sendMail({
-      from: process.env.GMAIL_USER, // Tu dirección de Gmail
-      to: email, // Dirección del destinatario
+    const msg = {
+      to: email,
+      from: 'mateobastidas146@gmail.com', 
       subject: 'Solicitud de reseteo de contraseña',
       text: `
         Hola ${user.name},
@@ -112,7 +99,9 @@ export const requestPasswordReset = async (req, res) => {
         https://react-pet-finder.onrender.com/reset-password?token=${token}
         Este link es válido por 1 hora.
       `,
-    });
+    };
+
+    await sgMail.send(msg);
 
     res.status(200).json({ message: 'Email de reseteo enviado.' });
   } catch (error) {
