@@ -38,6 +38,9 @@ export const requestPasswordReset = async (req, res) => {
     });
 
     if (!response.ok) {
+      const errorText = await response.text(); // Obtener el cuerpo de la respuesta
+      console.log('EmailJS response status:', response.status); // Log del status
+      console.log('EmailJS response body:', errorText); // Log del cuerpo
       throw new Error('Error enviando email con EmailJS');
     }
 
