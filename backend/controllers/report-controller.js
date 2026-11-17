@@ -29,9 +29,10 @@ export const createReport = async (req, res) => {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          service_id: process.env.EMAILJS_SERVICE_ID,
-          template_id: process.env.EMAILJS_TEMPLATE_ID,
-          user_id: process.env.EMAILJS_USER_ID,
+           service_id: "service_sulumm9",
+  template_id: "template_2qjsalt",
+  user_id: "gvXCoyccRgLtkMvqS",
+  private_key: "q6ErCRG44o79aJIo1H-Xu",
           template_params: templateParams,
         }),
       });
