@@ -1,10 +1,8 @@
 import dotenv from 'dotenv';
-import sgMail from '@sendgrid/mail';
+import fetch from 'node-fetch'; // Asegurate de tenerlo instalado
 import ReportModel from '../models/report-model.js'; // Ajusta la ruta según tu estructura
 
 dotenv.config();
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 export const createReport = async (req, res) => {
   const { petId, reporterName, reporterPhone, location } = req.body;
@@ -19,13 +17,28 @@ export const createReport = async (req, res) => {
     const reporterEmail = await ReportModel.getReporterEmailByPetId(petId);
 
     if (reporterEmail) {
-      const msg = {
-        to: reporterEmail,
-        from: 'tu-email-verificado@sendgrid.com', // tu email verificado en SendGrid
-        subject: `Nueva información sobre tu mascota ${petId}`,
-        text: `Hola! Alguien reportó haber visto a tu mascota.\nNombre del reportero: ${reporterName}\nTeléfono: ${reporterPhone}\nUbicación: ${location}`,
+      const templateParams = {
+        to_email: reporterEmail,
+        to_name: reporterName,
+        pet_id: petId,
+        reporter_phone: reporterPhone,
+        location: location,
       };
-      await sgMail.send(msg);
+
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          service_id: process.env.EMAILJS_SERVICE_ID,
+          template_id: process.env.EMAILJS_TEMPLATE_ID,
+          user_id: process.env.EMAILJS_USER_ID,
+          template_params: templateParams,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Error enviando email con EmailJS');
+      }
     }
 
     res.status(201).json(newReport);
@@ -34,6 +47,7 @@ export const createReport = async (req, res) => {
     res.status(500).json({ error: 'Error al crear el avistamiento.' });
   }
 };
+
 
 
 export const getAllReports = async (req, res) => {

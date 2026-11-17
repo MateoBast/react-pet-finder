@@ -4,17 +4,55 @@ import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
 import crypto from 'crypto';
-import sgMail from '@sendgrid/mail'; // Import SendGrid
+import fetch from 'node-fetch'; // Asegurate de tenerlo instalado
 
 dotenv.config();
-sgMail.setApiKey(process.env.SENDGRID_API_KEY); // Configurar API key
 
+export const requestPasswordReset = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await UserModel.getUserByEmail(email);
+    if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+
+    const token = crypto.randomBytes(20).toString('hex');
+    const tokenExpiration = Date.now() + 3600000;
+
+    await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
+
+    const templateParams = {
+      to_email: email,
+      to_name: user.name,
+      reset_link: `https://react-pet-finder.onrender.com/reset-password?token=${token}`,
+    };
+
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: process.env.EMAILJS_SERVICE_ID,
+        template_id: process.env.EMAILJS_TEMPLATE_ID,
+        user_id: process.env.EMAILJS_USER_ID,
+        template_params: templateParams,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Error enviando email con EmailJS');
+    }
+
+    res.status(200).json({ message: 'Email de reseteo enviado con EmailJS.' });
+  } catch (error) {
+    console.error('Error en requestPasswordReset con EmailJS:', error);
+    res.status(500).json({ error: 'Error al solicitar reseteo de contraseña.' });
+  }
+};
 
 
 // Controlador de login
 export const loginUser = async (req, res) => {
   const { email, password } = req.body;
-
+  
   try {
     const user = await AuthModel.login(email, password);
     const { password: userPassword, ...userWithoutPassword } = user;
@@ -77,46 +115,6 @@ export const authMiddleware = (req, res, next) => {
 };
 
 // Solicitar reseteo de contraseña
-export const requestPasswordReset = async (req, res) => {
-  const { email } = req.body;
-
-  try {
-    const user = await UserModel.getUserByEmail(email);
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
-
-    const token = crypto.randomBytes(20).toString('hex');
-    const tokenExpiration = Date.now() + 3600000;
-
-    await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
-
-    const msg = {
-  to: email,
-  from: 'mateobastidas146@gmail.com', // Cambiar a un dominio propio si es posible
-  subject: 'Solicitud de reseteo de contraseña',
-  text: `
-    Hola ${user.name},
-    Hiciste una solicitud para resetear tu contraseña. Hacé click en el siguiente enlace para continuar:
-    https://react-pet-finder.onrender.com/reset-password?token=${token}
-    Este link es válido por 1 hora.
-  `,
-  html: `
-    <p>Hola ${user.name},</p>
-    <p>Hiciste una solicitud para resetear tu contraseña. Hacé click en el siguiente enlace para continuar:</p>
-    <a href="https://react-pet-finder.onrender.com/reset-password?token=${token}">Resetear contraseña</a>
-    <p>Este link es válido por 1 hora.</p>
-    <hr />
-    <p>Si no solicitaste este mail, podés ignorarlo.</p>
-  `,
-};
-
-    await sgMail.send(msg);
-
-    res.status(200).json({ message: 'Email de reseteo enviado.' });
-  } catch (error) {
-    console.error('Error en requestPasswordReset:', error);
-    res.status(500).json({ error: 'Error al solicitar reseteo de contraseña.' });
-  }
-};
 
 export const resetPassword = async (req, res) => {
   const { token, newPassword } = req.body;
