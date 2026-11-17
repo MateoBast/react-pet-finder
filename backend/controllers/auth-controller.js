@@ -21,8 +21,7 @@ export const requestPasswordReset = async (req, res) => {
     await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
 
     const templateParams = {
-      to_email: email,
-      to_name: user.name,
+      to_name: user.name,  
       reset_link: `https://react-pet-finder.onrender.com/reset-password?token=${token}`,
     };
 
