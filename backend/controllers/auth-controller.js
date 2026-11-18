@@ -20,22 +20,26 @@ export const requestPasswordReset = async (req, res) => {
 
     await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
 
+    // Limpiamos el email de espacios
+    const cleanEmail = user.email.trim();
+
     const templateParams = {
-      to_name: user.name,  
+      to_name: user.name,
+      to_email: cleanEmail, // Usamos el email limpio
       reset_link: `https://react-pet-finder.onrender.com/reset-password?token=${token}`,
     };
+
+    console.log('Email del usuario:',cleanEmail); // Log del email
 
     const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-body: JSON.stringify({
-  service_id: "service_sulumm9",
-  template_id: "template_2qjsalt",
-  user_id: "gvXCoyccRgLtkMvqS",
-  private_key: "q6ErCRG44o79aJIo1H-Xu",
-  template_params: templateParams,
-}),
-
+      body: JSON.stringify({
+        service_id: "service_sulumm9",
+        template_id: "template_2qjsalt",
+        user_id: "gvXCoyccRgLtkMvqS",
+        template_params: templateParams,
+      }),
     });
 
     if (!response.ok) {
