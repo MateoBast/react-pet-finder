@@ -118,6 +118,3 @@ const MascotasCercanasPage = () => {
 };
 
 export default MascotasCercanasPage;
-
-
-export default MascotasCercanasPage;
