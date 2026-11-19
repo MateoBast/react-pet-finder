@@ -3,42 +3,51 @@ import { useLocation } from 'react-router-dom';
 import index from '../services/algolia';
 import ReportarModal from "../components/ReportarModal";
 
-useEffect(() => {
-  const fetchMascotasCercanas = async () => {
-    try {
-      console.log('Latitud:', latitude, 'Longitud:', longitude); // Log de coordenadas
+const MascotasCercanasPage = () => {
+  const [mascotas, setMascotas] = useState([]);
+  const [selectedPet, setSelectedPet] = useState(null); // Para almacenar la mascota seleccionada
+  const location = useLocation();
 
-      const { hits } = await index.search('', {
-        aroundLatLng: `${latitude},${longitude}`,
-        aroundRadius: 5000,
-      });
+  const queryParams = new URLSearchParams(location.search);
+  const latitude = queryParams.get('lat');
+  const longitude = queryParams.get('lng');
 
-      console.log('Hits de Algolia:', hits); // Log de resultados de Algolia
+  useEffect(() => {
+    const fetchMascotasCercanas = async () => {
+      try {
+        console.log('Latitud:', latitude, 'Longitud:', longitude); // Log de coordenadas
 
-      const petIds = hits.map(pet => pet.objectID);
-      const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
-      const data = await response.json();
+        const { hits } = await index.search('', {
+          aroundLatLng: `${latitude},${longitude}`,
+          aroundRadius: 5000,
+        });
 
-      const orderedData = petIds.map(id => {
-        const pet = data.find(pet => String(pet.id) === String(id));
-        if (pet && pet.location) {
-          const { lat, lng } = JSON.parse(pet.location);
-          pet.lat = lat;
-          pet.lng = lng;
-        }
-        return pet;
-      }).filter(Boolean);
+        console.log('Hits de Algolia:', hits); // Log de resultados de Algolia
 
-      setMascotas(orderedData);
-    } catch (error) {
-      console.error('Error buscando mascotas cercanas:', error);
+        const petIds = hits.map(pet => pet.objectID);
+        const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
+        const data = await response.json();
+
+        const orderedData = petIds.map(id => {
+          const pet = data.find(pet => String(pet.id) === String(id));
+          if (pet && pet.location) {
+            const { lat, lng } = JSON.parse(pet.location);
+            pet.lat = lat;
+            pet.lng = lng;
+          }
+          return pet;
+        }).filter(Boolean);
+
+        setMascotas(orderedData);
+      } catch (error) {
+        console.error('Error buscando mascotas cercanas:', error);
+      }
+    };
+
+    if (latitude && longitude) {
+      fetchMascotasCercanas();
     }
-  };
-
-  if (latitude && longitude) {
-    fetchMascotasCercanas();
-  }
-}, [latitude, longitude]);
+  }, [latitude, longitude]);
 
   const handleReport = async (reportData) => {
     try {
@@ -107,5 +116,8 @@ useEffect(() => {
     </div>
   );
 };
+
+export default MascotasCercanasPage;
+
 
 export default MascotasCercanasPage;
