@@ -3,48 +3,42 @@ import { useLocation } from 'react-router-dom';
 import index from '../services/algolia';
 import ReportarModal from "../components/ReportarModal";
 
-const MascotasCercanasPage = () => {
-  const [mascotas, setMascotas] = useState([]);
-  const [selectedPet, setSelectedPet] = useState(null); // Para almacenar la mascota seleccionada
-  const location = useLocation();
+useEffect(() => {
+  const fetchMascotasCercanas = async () => {
+    try {
+      console.log('Latitud:', latitude, 'Longitud:', longitude); // Log de coordenadas
 
-  const queryParams = new URLSearchParams(location.search);
-  const latitude = queryParams.get('lat');
-  const longitude = queryParams.get('lng');
+      const { hits } = await index.search('', {
+        aroundLatLng: `${latitude},${longitude}`,
+        aroundRadius: 5000,
+      });
 
-  useEffect(() => {
-    const fetchMascotasCercanas = async () => {
-  try {
-    const { hits } = await index.search('', {
-      aroundLatLng: `${latitude},${longitude}`,
-      aroundRadius: 5000,
-    });
+      console.log('Hits de Algolia:', hits); // Log de resultados de Algolia
 
-    const petIds = hits.map(pet => pet.objectID);
-    const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
-    const data = await response.json();
+      const petIds = hits.map(pet => pet.objectID);
+      const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
+      const data = await response.json();
 
-    // Modificamos aquí para parsear las coordenadas
-    const orderedData = petIds.map(id => {
-      const pet = data.find(pet => String(pet.id) === String(id));
-      if (pet && pet.location) {
-        const { lat, lng } = JSON.parse(pet.location); // Parseamos el string JSON
-        pet.lat = lat; // Asignamos lat
-        pet.lng = lng; // Asignamos lng
-      }
-      return pet;
-    }).filter(Boolean);
+      const orderedData = petIds.map(id => {
+        const pet = data.find(pet => String(pet.id) === String(id));
+        if (pet && pet.location) {
+          const { lat, lng } = JSON.parse(pet.location);
+          pet.lat = lat;
+          pet.lng = lng;
+        }
+        return pet;
+      }).filter(Boolean);
 
-    setMascotas(orderedData);
-  } catch (error) {
-    console.error('Error buscando mascotas cercanas:', error);
-  }
-};
-
-    if (latitude && longitude) {
-      fetchMascotasCercanas();
+      setMascotas(orderedData);
+    } catch (error) {
+      console.error('Error buscando mascotas cercanas:', error);
     }
-  }, [latitude, longitude]);
+  };
+
+  if (latitude && longitude) {
+    fetchMascotasCercanas();
+  }
+}, [latitude, longitude]);
 
   const handleReport = async (reportData) => {
     try {
