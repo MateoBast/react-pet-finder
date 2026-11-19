@@ -14,26 +14,32 @@ const MascotasCercanasPage = () => {
 
   useEffect(() => {
     const fetchMascotasCercanas = async () => {
-      try {
-        const { hits } = await index.search('', {
-          aroundLatLng: `${latitude},${longitude}`,
-          aroundRadius: 5000,
-        });
+  try {
+    const { hits } = await index.search('', {
+      aroundLatLng: `${latitude},${longitude}`,
+      aroundRadius: 5000,
+    });
 
-        const petIds = hits.map(pet => pet.objectID);
-        const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
-        const data = await response.json();
+    const petIds = hits.map(pet => pet.objectID);
+    const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
+    const data = await response.json();
 
-        // Asegúrate de que estás usando _geoloc para las coordenadas
-        const orderedData = petIds.map(id => 
-          data.find(pet => String(pet.id) === String(id))
-        ).filter(Boolean);
-
-        setMascotas(orderedData);
-      } catch (error) {
-        console.error('Error buscando mascotas cercanas:', error);
+    // Modificamos aquí para parsear las coordenadas
+    const orderedData = petIds.map(id => {
+      const pet = data.find(pet => String(pet.id) === String(id));
+      if (pet && pet.location) {
+        const { lat, lng } = JSON.parse(pet.location); // Parseamos el string JSON
+        pet.lat = lat; // Asignamos lat
+        pet.lng = lng; // Asignamos lng
       }
-    };
+      return pet;
+    }).filter(Boolean);
+
+    setMascotas(orderedData);
+  } catch (error) {
+    console.error('Error buscando mascotas cercanas:', error);
+  }
+};
 
     if (latitude && longitude) {
       fetchMascotasCercanas();
