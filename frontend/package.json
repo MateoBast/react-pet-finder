@@ -2,6 +2,7 @@
   "dependencies": {
     "algoliasearch": "^4.10.5",
     "axios": "^1.18.1",
+    "cors": "^2.8.6",
     "leaflet": "^1.9.4",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
@@ -10,12 +11,12 @@
     "react-scripts": "^5.0.1",
     "uuid": "^14.0.1"
   },
-"scripts": {
-  "start": "react-scripts start",
-  "build": "react-scripts build",
-  "test": "react-scripts test",
-  "eject": "react-scripts eject"
-},
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
   "browserslist": {
     "production": [
       ">0.2%",

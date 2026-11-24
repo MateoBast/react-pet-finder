@@ -49,11 +49,11 @@ function App() {
   const fetchMascotas = async () => {
     if (!user) return;
     try {
-      const response = await fetch(`https://react-pet-finder.onrender.com/api/pets`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+const res = await fetch('https://react-pet-finder.onrender.com/api/request-password-reset', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ email }),
+});
       const data = await response.json();
       console.log(data);
       setMascotas(data);

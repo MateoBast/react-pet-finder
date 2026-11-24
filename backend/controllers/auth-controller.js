@@ -12,16 +12,23 @@ export const requestPasswordReset = async (req, res) => {
   const { email } = req.body;
 
   try {
+    console.log('Email recibido:', email); // Log del email recibido
+
     const user = await UserModel.getUserByEmail(email);
-    if (!user) return res.status(404).json({ error: 'Usuario no encontrado.' });
+    if (!user) {
+      console.log('Usuario no encontrado para el email:', email); // Log si no se encuentra el usuario
+      return res.status(404).json({ error: 'Usuario no encontrado.' });
+    }
 
     const token = crypto.randomBytes(20).toString('hex');
     const tokenExpiration = Date.now() + 3600000;
 
     await UserModel.savePasswordResetToken(user.id, token, tokenExpiration);
+    console.log('Token generado:', token); // Log del token generado
 
     // Limpiamos el email de espacios
     const cleanEmail = user.email.trim();
+    console.log('Email limpio:', cleanEmail); // Log del email limpio
 
     const templateParams = {
       to_name: user.name,
@@ -29,18 +36,21 @@ export const requestPasswordReset = async (req, res) => {
       reset_link: `https://react-pet-finder.onrender.com/reset-password?token=${token}`,
     };
 
-    console.log('Email del usuario:',cleanEmail); // Log del email
+    console.log('Parámetros del template:', templateParams); // Log de los parámetros del template
 
-const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    service_id: "service_sulumm9",
-    template_id: "template_2qjsalt",
-    user_id: "gvXCoyccRgLtkMvqS",
-    template_params: templateParams,
-  }),
-});
+    const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: "service_sulumm9",
+        template_id: "template_2qjsalt",
+        user_id: "gvXCoyccRgLtkMvqS", // Usa tu user_id aquí
+        template_params: templateParams,
+      }),
+    });
+
+    console.log('Respuesta de EmailJS:', response); // Log de la respuesta de EmailJS
+
     if (!response.ok) {
       const errorText = await response.text(); // Obtener el cuerpo de la respuesta
       console.log('EmailJS response status:', response.status); // Log del status
@@ -54,6 +64,7 @@ const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
     res.status(500).json({ error: 'Error al solicitar reseteo de contraseña.' });
   }
 };
+
 
 
 // Controlador de login
@@ -138,7 +149,7 @@ export const resetPassword = async (req, res) => {
     await UserModel.clearResetToken(user.id);
 
     // Redirigir a localhost después de actualizar la contraseña
-    res.redirect('https://react-pet-finder.onrender.com/');
+    res.redirect('https://react-pet-finder.onrender.com');
   } catch (error) {
     console.error('Error en resetPassword:', error);
     res.status(500).send('Error al actualizar la contraseña.');
