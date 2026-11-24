@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import index from '../services/algolia';
 import ReportarModal from "../components/ReportarModal";
+
 const MascotasCercanasPage = () => {
   const [mascotas, setMascotas] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null); // Para almacenar la mascota seleccionada
@@ -14,16 +15,29 @@ const MascotasCercanasPage = () => {
   useEffect(() => {
     const fetchMascotasCercanas = async () => {
       try {
+        console.log('Latitud:', latitude, 'Longitud:', longitude); // Log de coordenadas
+
         const { hits } = await index.search('', {
           aroundLatLng: `${latitude},${longitude}`,
           aroundRadius: 10000,
         });
 
+        console.log('Hits de Algolia:', hits); // Log de resultados de Algolia
+
         const petIds = hits.map(pet => pet.objectID);
         const response = await fetch(`https://react-pet-finder.onrender.com/api/pets?ids=${petIds.join(',')}`);
         const data = await response.json();
 
-        const orderedData = petIds.map(id => data.find(pet => String(pet.id) === String(id))).filter(Boolean);
+        const orderedData = petIds.map(id => {
+          const pet = data.find(pet => String(pet.id) === String(id));
+          if (pet && pet.location) {
+            const { lat, lng } = JSON.parse(pet.location);
+            pet.lat = lat;
+            pet.lng = lng;
+          }
+          return pet;
+        }).filter(Boolean);
+
         setMascotas(orderedData);
       } catch (error) {
         console.error('Error buscando mascotas cercanas:', error);
@@ -63,7 +77,7 @@ const MascotasCercanasPage = () => {
         <ul>
           {mascotas.map(pet => (
             <li key={pet.id} style={{ marginBottom: '20px' }}>
-              <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center',width: "95%" }}>
+              <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', width: "95%" }}>
                 <img
   src={pet.imageurl}
   style={{ width: '100px', borderRadius: '8px', marginRight: '10px' }}
@@ -92,11 +106,11 @@ const MascotasCercanasPage = () => {
 
       {selectedPet && (
         <ReportarModal
-  petName={selectedPet.name}
-  petId={selectedPet.id} // Pasar el id también
-  onClose={() => setSelectedPet(null)}
-  onReport={handleReport}
-/>
+          petName={selectedPet.name}
+          petId={selectedPet.id} // Pasar el id también
+          onClose={() => setSelectedPet(null)}
+          onReport={handleReport}
+        />
       )}
     </div>
   );

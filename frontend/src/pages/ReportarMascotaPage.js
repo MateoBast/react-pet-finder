@@ -39,7 +39,7 @@ const ReportarMascotaPage = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
   e.preventDefault();
 
   if (!location || !selectedFile) {
@@ -47,11 +47,13 @@ const ReportarMascotaPage = () => {
     return;
   }
 
+  console.log('Ubicación a enviar:', JSON.stringify(location)); // Log de la ubicación
+
   const formData = new FormData();
   formData.append('name', nombre);
   formData.append('descripcion', ubicacion);
   formData.append('status', 'lost');
-  formData.append('location', JSON.stringify(location));
+  formData.append('location', JSON.stringify(location)); // Enviamos la ubicación como JSON string
   formData.append('image', selectedFile);
 
   try {
@@ -76,10 +78,8 @@ const ReportarMascotaPage = () => {
     const newPet = await response.json();
     console.log('Mascota reportada con éxito:', newPet);
 
-    // Actualizar el estado con la URL real de la imagen
     setFoto(newPet.imageUrl);
 
-    // Resetear el formulario (podés decidir si querés resetear o no)
     setNombre('');
     setUbicacion('');
     setLocation(null);
