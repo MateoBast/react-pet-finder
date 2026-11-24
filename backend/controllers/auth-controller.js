@@ -31,17 +31,16 @@ export const requestPasswordReset = async (req, res) => {
 
     console.log('Email del usuario:',cleanEmail); // Log del email
 
-    const response = await fetch('https://react-pet-finder.onrender.com/api/v1.0/email/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        service_id: "service_sulumm9",
-        template_id: "template_2qjsalt",
-        user_id: "gvXCoyccRgLtkMvqS",
-        template_params: templateParams,
-      }),
-    });
-
+const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    service_id: "service_sulumm9",
+    template_id: "template_2qjsalt",
+    user_id: "gvXCoyccRgLtkMvqS",
+    template_params: templateParams,
+  }),
+});
     if (!response.ok) {
       const errorText = await response.text(); // Obtener el cuerpo de la respuesta
       console.log('EmailJS response status:', response.status); // Log del status
