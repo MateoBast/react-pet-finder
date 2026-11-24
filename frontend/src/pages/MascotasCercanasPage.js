@@ -16,7 +16,7 @@ const MascotasCercanasPage = () => {
       try {
         const { hits } = await index.search('', {
           aroundLatLng: `${latitude},${longitude}`,
-          aroundRadius: 5000,
+          aroundRadius: 10000,
         });
 
         const petIds = hits.map(pet => pet.objectID);
@@ -65,11 +65,10 @@ const MascotasCercanasPage = () => {
             <li key={pet.id} style={{ marginBottom: '20px' }}>
               <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center',width: "95%" }}>
                 <img
-                  src={pet.imageurl}
-                  alt={pet.name}
-                  style={{ width: '100px', borderRadius: '8px', marginRight: '10px' }}
-                  onError={e => { e.target.onerror = null; e.target.src = 'ruta/por/defecto.png'; }}
-                />
+  src={pet.imageurl}
+  style={{ width: '100px', borderRadius: '8px', marginRight: '10px' }}
+  onError={e => { e.target.onerror = null; e.target.src = 'ruta/por/defecto.png'; }} // Verifica esta ruta
+/>
                 <div>
                   <h2>{pet.name}</h2>
                   <p>{pet.descripcion}</p>

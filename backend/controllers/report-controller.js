@@ -25,17 +25,17 @@ export const createReport = async (req, res) => {
         location: location,
       };
 
-      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-           service_id: "service_sulumm9",
-  template_id: "template_2qjsalt",
-  user_id: "gvXCoyccRgLtkMvqS",
-  private_key: "q6ErCRG44o79aJIo1H-Xu",
-          template_params: templateParams,
-        }),
-      });
+    const response = await fetch('https://react-pet-finder.onrender.com/api/v1.0/email/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        service_id: "service_sulumm9",
+        template_id: "template_926vcnt",
+        user_id: "gvXCoyccRgLtkMvqS",
+        template_params: templateParams,
+      }),
+    });
+
 
       if (!response.ok) {
         throw new Error('Error enviando email con EmailJS');
